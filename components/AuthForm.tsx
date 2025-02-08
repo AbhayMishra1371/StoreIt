@@ -1,6 +1,6 @@
 "use client";
 
-import { z } from "zod";
+import { string, z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import Image from "next/image";
@@ -16,31 +16,54 @@ import {
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
 
-const formSchema = z.object({
-  username: z.string().min(2).max(50),
-});
-
 import React, { useState } from "react";
-
+import { createAccount } from "@/lib/actions/user.actions";
+import OtpModel from "./OTPModel";
 
 type FormType = "sign-in" | "sign-up";
 
-
+const authFormSchema = (formType: FormType) => {
+  return z.object({
+    email: z.string().email(),
+    fullName: formType === "sign-up" ? z.string().min(2).max(50) : z.string().optional(),
+  });
+};
 
 const AuthForm = ({ type }: { type: FormType }) => {
   const [isLoding, setIsLoding] = useState(false);
-  const [errorMessage,seterrorMessage ] = useState("");
+  const [errorMessage, setErrorMessage] = useState("");
+  const [accountId,setAccountId] = useState("");
+  const formSchema = authFormSchema(type);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: "",
+      fullName: "",
+      email: "",
     },
   });
 
   // 2. Define a submit handler.
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
-    console.log(values);
-  };
+    setIsLoding(true);
+    setErrorMessage("");
+   try{
+    const user = await createAccount(
+      {
+        fullName: values.fullName || '',
+        email: values.email,
+      }
+    );
+   setAccountId(user.accountId);
+  }
+   catch{
+    setErrorMessage('Failed to create an account. Please try again');
+   }
+   finally{
+    setIsLoding(false);
+   }
+   }
+  
+    
 
   return (
     <>
@@ -94,23 +117,40 @@ const AuthForm = ({ type }: { type: FormType }) => {
               </FormItem>
             )}
           />
-          <Button type="submit" className="form-submit-button" disabled={isLoding}>
+          <Button
+            type="submit"
+            className="form-submit-button"
+            disabled={isLoding}
+          >
             {type === "sign-in" ? "Sign In" : "Sign Up"}
 
-            {isLoding && (<Image src="/assets/icons/loader.svg" alt ="loader" width={24} height={24} className="ml-2 animate-spin"/>)}
+            {isLoding && (
+              <Image
+                src="/assets/icons/loader.svg"
+                alt="loader"
+                width={24}
+                height={24}
+                className="ml-2 animate-spin"
+              />
+            )}
           </Button>
           {errorMessage && <p className="error-message">*{errorMessage}</p>}
           <div className="body-2 flex justify-center">
             <p className="text-light-100">
-                {type === "sign-in" ? "Don't have an account?" :"Already have an account?"}
+              {type === "sign-in"
+                ? "Don't have an account?"
+                : "Already have an account?"}
             </p>
-            <Link href = {type === "sign-in" ? "/sign-up" : "/sign-in"} className="ml-1 font-mediu text-brand">
-                
-                {type === "sign-in" ? "Sign Up" : "Sign In"}
-</Link>
+            <Link
+              href={type === "sign-in" ? "/sign-up" : "/sign-in"}
+              className="ml-1 font-mediu text-brand"
+            >
+              {type === "sign-in" ? "Sign Up" : "Sign In"}
+            </Link>
           </div>
         </form>
       </Form>
+      {accountId && <OtpModel email={form.getValues().email} accountId={accountId} />}
     </>
   );
 };
