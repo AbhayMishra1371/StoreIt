@@ -80,6 +80,6 @@ export const navItems = [
       value: 'size-asc',
     },
   ];
- export  const avatarPlaceHolderUrl = "https://static.vecteezy.com/system/resources/previews/006/487/917/original/man-avatar-icon-free-vector.jpg";
+ export  const avatarPlaceholderUrl = "https://static.vecteezy.com/system/resources/previews/006/487/917/original/man-avatar-icon-free-vector.jpg";
   
   export const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB

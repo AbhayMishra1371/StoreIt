@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import React, { useState } from "react";
 import {
   AlertDialog,
@@ -21,11 +21,18 @@ import {
 import Image from "next/image";
 import { Button } from "./ui/button";
 import { verify } from "crypto";
-import { verifySecret,sendEmailOTP } from "@/lib/actions/user.actions";
+import { verifySecret, sendEmailOTP } from "@/lib/actions/user.actions";
 import { useRouter } from "next/navigation";
+import { string } from "zod";
 
-const OtpModel = ({accountId,email}:{accountId: string, email: string}) => {
-const router = useRouter();
+const OtpModel = ({
+  accountId,
+  email,
+}: {
+  accountId: string;
+  email: string;
+}) => {
+  const router = useRouter();
   const [isOpen, setIsOpen] = useState(true);
   const [password, setpassword] = useState("");
   const [isLoding, setIsLoding] = useState(false);
@@ -33,25 +40,22 @@ const router = useRouter();
   const handleSubmit = async (e: React.MouseEvent<HTMLButtonElement>) => {
     e.preventDefault();
     setIsLoding(true);
-  
-    try{
-        const sessionId = await verifySecret(accountId, password);
 
-    if(sessionId){
+    try {
+      const sessionId = await verifySecret({accountId, password});
+
+      if (sessionId) {
         router.push("/");
-    }
-    }catch(error){
-        console.error(error);
+      }
+    } catch (error) {
+      console.error(error);
     }
     setIsLoding(false);
-    
   };
 
   const handleResendOtp = async () => {
-    await sendEmailOTP(email);
+    await sendEmailOTP({email});
   };
-
-
 
   return (
     <AlertDialog open={isOpen} onOpenChange={setIsOpen}>
@@ -87,33 +91,33 @@ const router = useRouter();
         <AlertDialogFooter>
           <div className="flex w-full flex-col gap-4">
             <AlertDialogAction
-            onClick={handleSubmit}
-            className="shad-submit-btn h-12"
-            type="button"
-          >
-            Submit
-           {isLoding && <Image
-              src="/assets/icons/loader.svg"
-              alt="loder"
-              width={24}
-              height={24}
-              className="ml-2 animate-spin"
-            />}
-          </AlertDialogAction>
-          <div className="subtitle-2 mt-2 text-center text-light-100">
-            Didn't receive the OTP?
-            <Button
+              onClick={handleSubmit}
+              className="shad-submit-btn h-12"
               type="button"
-              variant="link"
-              onClick={handleResendOtp}
-              className="text-brand pl-1"
             >
-              Resend OTP
-            </Button>
+              Submit
+              {isLoding && (
+                <Image
+                  src="/assets/icons/loader.svg"
+                  alt="loder"
+                  width={24}
+                  height={24}
+                  className="ml-2 animate-spin"
+                />
+              )}
+            </AlertDialogAction>
+            <div className="subtitle-2 mt-2 text-center text-light-100">
+              Didn't receive the OTP?
+              <Button
+                type="button"
+                variant="link"
+                onClick={handleResendOtp}
+                className="text-brand pl-1"
+              >
+                Resend OTP
+              </Button>
+            </div>
           </div>
-          </div>
-          
-          
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

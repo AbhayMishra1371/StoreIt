@@ -25,14 +25,17 @@ type FormType = "sign-in" | "sign-up";
 const authFormSchema = (formType: FormType) => {
   return z.object({
     email: z.string().email(),
-    fullName: formType === "sign-up" ? z.string().min(2).max(50) : z.string().optional(),
+    fullName:
+      formType === "sign-up"
+        ? z.string().min(2).max(50)
+        : z.string().optional(),
   });
 };
 
 const AuthForm = ({ type }: { type: FormType }) => {
   const [isLoding, setIsLoding] = useState(false);
   const [errorMessage, setErrorMessage] = useState("");
-  const [accountId,setAccountId] = useState("");
+  const [accountId, setAccountId] = useState("");
   const formSchema = authFormSchema(type);
   const form = useForm<z.infer<typeof formSchema>>({
     resolver: zodResolver(formSchema),
@@ -46,24 +49,18 @@ const AuthForm = ({ type }: { type: FormType }) => {
   const onSubmit = async (values: z.infer<typeof formSchema>) => {
     setIsLoding(true);
     setErrorMessage("");
-   try{
-    const user = await createAccount(
-      {
-        fullName: values.fullName || '',
+    try {
+      const user = await createAccount({
+        fullName: values.fullName || "",
         email: values.email,
-      }
-    );
-   setAccountId(user.accountId);
-  }
-   catch{
-    setErrorMessage('Failed to create an account. Please try again');
-   }
-   finally{
-    setIsLoding(false);
-   }
-   }
-  
-    
+      });
+      setAccountId(user.accountId);
+    } catch {
+      setErrorMessage("Failed to create an account. Please try again");
+    } finally {
+      setIsLoding(false);
+    }
+  };
 
   return (
     <>
@@ -150,7 +147,9 @@ const AuthForm = ({ type }: { type: FormType }) => {
           </div>
         </form>
       </Form>
-      {accountId && <OtpModel email={form.getValues().email} accountId={accountId} />}
+      {accountId && (
+        <OtpModel email={form.getValues().email} accountId={accountId} />
+      )}
     </>
   );
 };
