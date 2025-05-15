@@ -2,8 +2,9 @@
 import React, { useCallback, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import { Button } from "./ui/button";
-import { cn } from "@/lib/utils";
+import { cn, convertFileToUrl, getFileType } from "@/lib/utils";
 import Image from "next/image";
+import Thumbnail from "./Thumbnail";
 
 interface Props {
   ownerId: string;
@@ -12,8 +13,8 @@ interface Props {
 }
 export const FileUploder = ({ ownerId, accountId, className }: Props) => {
     const [files, setFiles] = useState<File[]>([]);
-  const onDrop = useCallback((acceptedFiles) => {
-    // Do something with the files
+  const onDrop = useCallback(async (acceptedFiles: File[]) => {
+    setFiles(acceptedFiles)
   }, []);
   const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
 
@@ -31,10 +32,20 @@ export const FileUploder = ({ ownerId, accountId, className }: Props) => {
       </Button>
       {files.length >0 && <ul className="uploder-preview-list">
         <h4 className="h4 text-light-100">Uploding</h4>
-{/* 
+ 
         {files.map((file,index) => {
-             const {type,extension} = getFile
-        })} */}
+             const {type,extension} = getFileType(file.name);
+
+             return (
+              <li 
+              key={`${file.name}-${index}`}
+              className="uploader-preview-item">
+               <div className="flex items-center gap-3">
+                <Thumbnail type={type} extension={extension} url={convertFileToUrl(file)}/>
+               </div>
+              </li>
+             );
+        })} 
         </ul>}
       {isDragActive ? (
         <p>Drop the files here ...</p>

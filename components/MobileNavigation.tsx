@@ -101,7 +101,7 @@ export const MobileNavigation = ({
     <Separator className="my-5 bg-light-200/20"/>
 
     <div className="flex flex-col justify-between gap-5 pd-5">
-     <FileUploder/>
+    {} <FileUploder/>
       <Button type="submit" className="mobile-sign-out-button" onClick={async ()=> await signOutUser()}>
                  <Image
                    src="/assets/icons/logout.svg"
