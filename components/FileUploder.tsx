@@ -5,6 +5,10 @@ import { Button } from "./ui/button";
 import { cn, convertFileToUrl, getFileType } from "@/lib/utils";
 import Image from "next/image";
 import Thumbnail from "./Thumbnail";
+import { useToast } from "@/hooks/use-toast"
+import { uplodeFile } from "@/lib/actions/file.action";
+import { usePathname } from "next/navigation";
+
 
 interface Props {
   ownerId: string;
@@ -12,19 +16,38 @@ interface Props {
   className?: string;
 }
 export const FileUploder = ({ ownerId, accountId, className }: Props) => {
+  const path = usePathname();
+  const {toast} = useToast();
   const [files, setFiles] = useState<File[]>([]);
   const onDrop = useCallback(async (acceptedFiles: File[]) => {
     setFiles(acceptedFiles);
-    
-    const uploadPromises = acceptedFiles.map(async (file) =>{
-      if(file.size > 10 * 1024 * 1024) {
+
+    const uploadPromises = acceptedFiles.map(async (file) => {
+      if (file.size > 10 * 1024 * 1024) {
         setFiles((prevFiles) => prevFiles.filter((f) => f.name !== file.name));
 
-        return;
+        return toast({
+          description: (
+            <p className="body-2 text-white">
+              <span className="font-semibold">
+                {file.name} 
+              </span> is too large. Please select a file smaller than 10MB.
+            </p>
+          ),className:"error-toast",  
+        });
       }
-    })
-  }, []);
-  const { getRootProps, getInputProps, isDragActive } = useDropzone({ onDrop });
+
+      return uplodeFile({file, ownerId, accountId, path}).then((uploadedFile)=>{
+        if(uploadedFile){
+          setFiles((prevFiles)=>prevFiles.filter((f)=>f.name !== file.name)
+        );
+        }
+
+      })
+      await Promise.all(uploadPromises);
+    });
+  }, [ownerId, accountId, path]);
+  const { getRootProps, getInputProps} = useDropzone({ onDrop });
 
   const handleRemoveFile = (
     e: React.MouseEvent<HTMLImageElement, MouseEvent>,
@@ -84,11 +107,6 @@ export const FileUploder = ({ ownerId, accountId, className }: Props) => {
             );
           })}
         </ul>
-      )}
-      {isDragActive ? (
-        <p>Drop the files here ...</p>
-      ) : (
-        <p>Drag 'n' drop some files here, or click to select files</p>
       )}
     </div>
   );
