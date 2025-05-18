@@ -23,7 +23,7 @@ export const FileUploder = ({ ownerId, accountId, className }: Props) => {
     setFiles(acceptedFiles);
 
     const uploadPromises = acceptedFiles.map(async (file) => {
-      if (file.size > 10 * 1024 * 1024) {
+      if (file.size > 50* 1024 * 1024) {
         setFiles((prevFiles) => prevFiles.filter((f) => f.name !== file.name));
 
         return toast({

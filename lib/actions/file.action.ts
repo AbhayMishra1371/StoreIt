@@ -6,7 +6,7 @@ import { appwriteConfig } from "../appwrite/config";
 import { ID, Users } from "node-appwrite";
 import { constructFileUrl, getFileType, parseStringify } from "../utils";
 import { revalidatePath } from "next/cache";
-import {UploadFileProps} from "@/types";
+
 
 const handleError = (error: unknown, message: string) => {
   console.log(error, message);
