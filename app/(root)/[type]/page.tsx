@@ -1,9 +1,10 @@
+import { getFiles } from '@/lib/actions/file.action';
 import React from 'react'
 
 const page = async({params}:SearchParamProps) => {
     const type = ((await params)?.type as string) || "";
 
-
+const files = await getFiles();
   return (
     <div className='page-container'>
         <section className='w-full'>
@@ -20,6 +21,9 @@ const page = async({params}:SearchParamProps) => {
              </section>
 
              {/* Render the file list here */}
+             {files.length > 0 ? (
+                <section></section>
+             ):<p>No files uploded</p> }
       
     </div>
   )
