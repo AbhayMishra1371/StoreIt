@@ -1,3 +1,4 @@
+import Card from '@/components/Card';
 import { getFiles } from '@/lib/actions/file.action';
 import { Models } from 'node-appwrite';
 import React from 'react'
@@ -26,7 +27,7 @@ const files = await getFiles();
                 <section className='file-list'>
 
                     {files.documents.map((file:Models.Document) => (
-                        <h1 key={file.$id} className='h1'>{file.name}</h1>
+                       <Card key={file.$id} file={file}/>
                     ))}
                 </section>
              ):<p className='empty-list'>No files uploded</p> }
