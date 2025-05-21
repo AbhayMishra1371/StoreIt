@@ -65,7 +65,7 @@ const createQueries = (currentUser: Models.Document) => {
   const queries = [
     Query.or([
       Query.equal("owner", [currentUser.$id]),
-      Query.equal("users", [currentUser.email]),
+      Query.contains("users", [currentUser.email]),
     ])
   ];
 
@@ -83,6 +83,9 @@ export const getFiles = async () => {
     }
 
     const queries = createQueries(currentUser);
+
+    console.log("Queries: ", queries);
+    console.log("Current User: ", currentUser);
 
     const files = await databases.listDocuments(
      appwriteConfig.databaseId,

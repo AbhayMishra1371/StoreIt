@@ -1,4 +1,5 @@
 import { getFiles } from '@/lib/actions/file.action';
+import { Models } from 'node-appwrite';
 import React from 'react'
 
 const page = async({params}:SearchParamProps) => {
@@ -21,9 +22,14 @@ const files = await getFiles();
              </section>
 
              {/* Render the file list here */}
-             {files.length > 0 ? (
-                <section></section>
-             ):<p>No files uploded</p> }
+             {files.total > 0 ? (
+                <section className='file-list'>
+
+                    {files.documents.map((file:Models.Document) => (
+                        <h1 key={file.$id} className='h1'>{file.name}</h1>
+                    ))}
+                </section>
+             ):<p className='empty-list'>No files uploded</p> }
       
     </div>
   )
