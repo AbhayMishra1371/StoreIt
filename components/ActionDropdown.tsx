@@ -55,12 +55,17 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
           fileId: file.$id,
           name,
           extension: file.extension,
-          path: file.path,
+          path: path,
         }),
-          // have to implement 
+         
         share:()=> console.log("share"),
         delete:()=> console.log("delte"),
     };
+
+    success = await actions[action.value as keyof typeof actions]();
+
+    if(success) closeAllModal();
+    setIsLoading(false);
   };
   const RenderDialogContent = () => {
     if (!action) return null;
