@@ -1,6 +1,6 @@
 "use client";
 import { Models } from "node-appwrite";
-import React, { useState } from "react";
+import React, { use, useState } from "react";
 import {
   Dialog,
   DialogContent,
@@ -25,6 +25,9 @@ import { constructDownloadUrl } from "@/lib/utils";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { set } from "zod";
+import { rename } from "fs";
+import { renameFile } from "@/lib/actions/file.action";
+import { usePathname } from "next/navigation";
 
 const ActionDropdown = ({ file }: { file: Models.Document }) => {
   const [isModelOpen, setIsModelOpen] = useState(false);
@@ -39,22 +42,45 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
     setName(file.name);
   };
 
-  const handleAction = async () => {}
+  const path = usePathname();
+
+  const handleAction = async () => {
+    if (!action) return;
+    setIsLoading(true);
+    let success = false;
+
+    const actions = {
+      rename: () =>
+        renameFile({
+          fileId: file.$id,
+          name,
+          extension: file.extension,
+          path: file.path,
+        }),
+          // have to implement this
+        share:()=> console.log("share"),
+        delete:()=> console.log("delte"),
+    };
+  };
   const RenderDialogContent = () => {
     if (!action) return null;
 
-    const {value, label} = action;
+    const { value, label } = action;
     return (
       <DialogContent className="shad-dialog button">
         <DialogHeader className="flex flex-col gap-3">
           <DialogTitle className="text-center text-light-100">
-           {label}
+            {label}
           </DialogTitle>
           {value === "rename" && (
-            <Input type="text" value={name} onChange={(e) => setName(e.target.value)} />
+            <Input
+              type="text"
+              value={name}
+              onChange={(e) => setName(e.target.value)}
+            />
           )}
         </DialogHeader>
-        {['rename', 'delete','share'].includes(value) && (
+        {["rename", "delete", "share"].includes(value) && (
           <DialogFooter className="flex flex-col gap-3 md:flex-row">
             <Button onClick={closeAllModal} className="modal-cancel-button">
               Cancle
@@ -105,6 +131,8 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
                   )
                 ) {
                   setIsModelOpen(true);
+
+
                 }
               }}
             >
