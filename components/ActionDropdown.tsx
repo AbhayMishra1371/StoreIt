@@ -57,7 +57,7 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
           extension: file.extension,
           path: file.path,
         }),
-          // have to implement thi
+          // have to implement this
         share:()=> console.log("share"),
         delete:()=> console.log("delte"),
     };
