@@ -29,6 +29,8 @@ import { rename } from "fs";
 import { renameFile } from "@/lib/actions/file.action";
 import { usePathname } from "next/navigation";
 import { FileDetails } from "./ActionsModalContent";
+import ShareFile from "./ShareInput";
+import ShareInput from "./ShareInput";
 
 const ActionDropdown = ({ file }: { file: Models.Document }) => {
   const [isModelOpen, setIsModelOpen] = useState(false);
@@ -42,6 +44,8 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
     setAction(null);
     setName(file.name);
   };
+
+  const [emails, setEmails] = useState([]);
 
   const path = usePathname();
 
@@ -58,16 +62,18 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
           extension: file.extension,
           path: path,
         }),
-         
-        share:()=> console.log("share"),
-        delete:()=> console.log("delte"),
+
+      share: () => console.log("share"),
+      delete: () => console.log("delte"),
     };
 
     success = await actions[action.value as keyof typeof actions]();
 
-    if(success) closeAllModal();
+    if (success) closeAllModal();
     setIsLoading(false);
   };
+
+  const handleRemoveUser = () => {};
   const RenderDialogContent = () => {
     if (!action) return null;
 
@@ -85,8 +91,9 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
               onChange={(e) => setName(e.target.value)}
             />
           )}
-          //For details
-          {value && "details" && <FileDetails file={file} />}
+
+          {value === "details" && <FileDetails file={file} />}
+          {value === "share" && (<ShareInput file={file} onInputChange={setEmails} onRemove={handleRemoveUser}/>)}
         </DialogHeader>
         {["rename", "delete", "share"].includes(value) && (
           <DialogFooter className="flex flex-col gap-3 md:flex-row">
@@ -134,13 +141,11 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
                 setAction(actionItem);
 
                 if (
-                  ["rename", "delete", "share", "detail"].includes(
+                  ["rename", "delete", "share", "details"].includes(
                     actionItem.value
                   )
                 ) {
                   setIsModelOpen(true);
-
-
                 }
               }}
             >
