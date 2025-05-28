@@ -10,7 +10,7 @@ interface Props {
 const ShareInput = ({file,onInputChange,onRemove}:Props) => {
   return (
     <div>
-      
+    hello  
     </div>
   )
 }
