@@ -4,7 +4,6 @@ import React, { use, useState } from "react";
 import {
   Dialog,
   DialogContent,
-  DialogDescription,
   DialogFooter,
   DialogHeader,
   DialogTitle,
@@ -26,11 +25,10 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { set } from "zod";
 import { rename } from "fs";
-import { renameFile } from "@/lib/actions/file.action";
+import { renameFile, updateFileUsers } from "@/lib/actions/file.action";
 import { usePathname } from "next/navigation";
-import { FileDetails } from "./ActionsModalContent";
-import ShareFile from "./ShareInput";
-import ShareInput from "./ShareInput";
+import { FileDetails, ShareInput } from "./ActionsModalContent";
+
 
 const ActionDropdown = ({ file }: { file: Models.Document }) => {
   const [isModelOpen, setIsModelOpen] = useState(false);
@@ -45,7 +43,7 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
     setName(file.name);
   };
 
-  const [emails, setEmails] = useState([]);
+  const [emails, setEmails] = useState<string[]>();
 
   const path = usePathname();
 
@@ -63,7 +61,8 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
           path: path,
         }),
 
-      share: () => console.log("share"),
+      share: () => updateFileUsers({
+        fileId: file.$id, emails ,path}),
       delete: () => console.log("delte"),
     };
 
