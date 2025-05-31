@@ -25,7 +25,7 @@ import { Input } from "./ui/input";
 import { Button } from "./ui/button";
 import { set } from "zod";
 import { rename } from "fs";
-import { renameFile, updateFileUsers } from "@/lib/actions/file.action";
+import { deleteFile, renameFile, updateFileUsers } from "@/lib/actions/file.action";
 import { usePathname } from "next/navigation";
 import { FileDetails, ShareInput } from "./ActionsModalContent";
 
@@ -63,7 +63,7 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
 
       share: () => updateFileUsers({
         fileId: file.$id, emails ,path}),
-      delete: () => console.log("delte"),
+      delete: () => deleteFile({fileId: file.$id, bucketFileId: file.bucketfileId, path}),
     };
 
     success = await actions[action.value as keyof typeof actions]();
@@ -72,7 +72,21 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
     setIsLoading(false);
   };
 
-  const handleRemoveUser = () => {};
+  const handleRemoveUser = async (email: string) => {
+    
+    
+    const updateedEmails = emails.filter((e) => e !== email);
+
+    const success = await updateFileUsers({fileId: file.$id, emails: updateedEmails, path});
+
+    if (success) {
+      setEmails(updateedEmails);
+      closeAllModal();
+    }
+
+  };
+
+
   const RenderDialogContent = () => {
     if (!action) return null;
 
@@ -93,6 +107,12 @@ const ActionDropdown = ({ file }: { file: Models.Document }) => {
 
           {value === "details" && <FileDetails file={file} />}
           {value === "share" && (<ShareInput file={file} onInputChange={setEmails} onRemove={handleRemoveUser}/>)}
+          {value === "delete" && (
+            <p className="delete-confirmation">
+              Are you sure you want to delete {` `}
+              <span className="delete-file-name">{file.name}</span>?
+            </p>
+          )}
         </DialogHeader>
         {["rename", "delete", "share"].includes(value) && (
           <DialogFooter className="flex flex-col gap-3 md:flex-row">
