@@ -5,11 +5,13 @@ import { Models } from 'node-appwrite';
 import React from 'react'
 import { types } from 'util';
 
-const page = async({params}:SearchParamProps) => {
+const page = async({searchParams,params}:SearchParamProps) => {
     const type = ((await params)?.type as string) || "";
     const types = getFileTypesParams(type) as FileType[];
+    const searchText = ((await searchParams)?.query as string) || "";
+        const sort = ((await params)?.sort as string) || "";
 
-const files = await getFiles({types});
+const files = await getFiles({types,searchText,sort});
   return (
     <div className='page-container'>
         <section className='w-full'>

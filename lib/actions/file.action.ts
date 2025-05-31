@@ -8,7 +8,6 @@ import { constructFileUrl, getFileType, parseStringify } from "../utils";
 import { revalidatePath } from "next/cache";
 import { getCurrentUser } from "./user.actions";
 
-
 const handleError = (error: unknown, message: string) => {
   console.log(error, message);
   throw error;
@@ -53,60 +52,80 @@ export const uplodeFile = async ({
         handleError(error, "Failed to create file document");
       });
 
-      revalidatePath(path);
+    revalidatePath(path);
 
-      return parseStringify(newfile);
+    return parseStringify(newfile);
   } catch (error) {
     handleError(error, "Failed to upload file");
   }
 };
 
-const createQueries = (currentUser: Models.Document,types:string[]) => {
+const createQueries = (currentUser: Models.Document, types: string[],searchText:string,sort:string,limit?:number) => {
   const queries = [
     Query.or([
       Query.equal("owner", [currentUser.$id]),
       Query.contains("users", [currentUser.email]),
-    ])
+    ]),
   ];
 
-  if(types.length > 0) {
+  if (types.length > 0) {
     queries.push(Query.equal("type", types));
   }
+   if (searchText) {
+    queries.push(Query.contains("name", searchText));
+  }
+   if (limit) {
+    queries.push(Query.limit(limit));
+  }
+
+  if(sort){ 
+    const [sortBy, OrderBy] = sort.split("-");
+
+  queries.push(OrderBy === "asc" ? Query.orderAsc(sortBy) : Query.orderDesc(sortBy));
+}
+ 
 
   return queries;
-}
+};
 
-export const getFiles = async ({types=[]}:GetFilesProps) => {
+export const getFiles = async ({
+  types = [],
+  searchText = "",
+  sort = "$createdAt-desc",
+  limit,
+}: GetFilesProps) => {
   const { databases } = await createAdminClient();
 
-  try{
+  try {
     const currentUser = await getCurrentUser();
 
-    if(!currentUser) {
+    if (!currentUser) {
       throw new Error("User not found");
     }
 
-    const queries = createQueries(currentUser,types);
-
-    
+    const queries = createQueries(currentUser, types,searchText, sort, limit);
 
     const files = await databases.listDocuments(
-     appwriteConfig.databaseId,
-     appwriteConfig.fileCollectionId,
-     queries,
+      appwriteConfig.databaseId,
+      appwriteConfig.fileCollectionId,
+      queries
     );
 
-    return parseStringify(files); 
-
-  }catch (error) {
+    return parseStringify(files);
+  } catch (error) {
     handleError(error, "Failed to get files");
   }
-}
+};
 
-export const renameFile = async ({fileId,name,extension,path}: RenameFileProps) => {
+export const renameFile = async ({
+  fileId,
+  name,
+  extension,
+  path,
+}: RenameFileProps) => {
   const { databases } = await createAdminClient();
 
-  try{
+  try {
     const newName = `${name}.${extension}`;
     const updatedFile = await databases.updateDocument(
       appwriteConfig.databaseId,
@@ -114,55 +133,60 @@ export const renameFile = async ({fileId,name,extension,path}: RenameFileProps) 
       fileId,
       {
         name: newName,
-      },
+      }
     );
 
     revalidatePath(path);
     return parseStringify(updatedFile);
-  }catch (error) {
+  } catch (error) {
     handleError(error, "Failed to rename file");
   }
+};
 
-}
-
-export const updateFileUsers = async ({fileId,emails,path}: UpdateFileUsersProps) => {
+export const updateFileUsers = async ({
+  fileId,
+  emails,
+  path,
+}: UpdateFileUsersProps) => {
   const { databases } = await createAdminClient();
 
-  try{
-   
+  try {
     const updatedFile = await databases.updateDocument(
       appwriteConfig.databaseId,
       appwriteConfig.fileCollectionId,
       fileId,
       {
         users: emails,
-      },
+      }
     );
 
     revalidatePath(path);
     return parseStringify(updatedFile);
-  }catch (error) {
+  } catch (error) {
     handleError(error, "Failed to rename file");
   }
+};
 
-}
-
-export const deleteFile = async ({fileId, bucketFileId, path}: DeleteFileProps) => {
+export const deleteFile = async ({
+  fileId,
+  bucketFileId,
+  path,
+}: DeleteFileProps) => {
   const { databases, storage } = await createAdminClient();
 
-  try{
+  try {
     const deletedFile = await databases.deleteDocument(
       appwriteConfig.databaseId,
       appwriteConfig.fileCollectionId,
-      fileId,
+      fileId
     );
-    if(!deletedFile) {
-    await storage.deleteFile(appwriteConfig.bucketId, bucketFileId);
+    if (!deletedFile) {
+      await storage.deleteFile(appwriteConfig.bucketId, bucketFileId);
     }
 
     revalidatePath(path);
-    return parseStringify({status:'success'});
-  }catch (error) {
+    return parseStringify({ status: "success" });
+  } catch (error) {
     handleError(error, "Failed to delete file");
   }
-}
+};
