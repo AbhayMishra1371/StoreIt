@@ -20,6 +20,7 @@ export const Search = () => {
   const [open, setOpen] = React.useState(false);
  const router = useRouter();
  const path = usePathname();
+ return router.push(path.replace(searchParams.toString(), ""))
   useEffect(() => {
     const fetchFiles = async () => {
       if(!query){
